@@ -1,0 +1,11 @@
+name: CorxlRecipes
+version: '${project.version}'
+main: me.corxl.corxlrecipes.CorxlRecipes
+api-version: 1.18
+authors: [ Corxl ]
+description: Custom Recipies for the nSmatic SMP
+
+
+commands:
+  crgiveitem:
+    permission: corxlrecipes.giveitem
