@@ -2,9 +2,11 @@ package me.corxl.corxlrecipes;
 
 import me.corxl.corxlrecipes.Commands.GiveItemCommand;
 import me.corxl.corxlrecipes.Commands.GiveItemTabCompleter;
-import me.corxl.corxlrecipes.Recipies.EmptyBook;
-import me.corxl.corxlrecipes.Recipies.CustomRecipe;
-import me.corxl.corxlrecipes.Recipies.EnchantmentPage;
+import me.corxl.corxlrecipes.Events.Events;
+import me.corxl.corxlrecipes.Recipies.BlockRecipes.DyamiteRecipe;
+import me.corxl.corxlrecipes.Recipies.EnchantmentBooks.CustomRecipe;
+import me.corxl.corxlrecipes.Recipies.EnchantmentBooks.EmptyBook;
+import me.corxl.corxlrecipes.Recipies.EnchantmentBooks.EnchantmentPage;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -51,6 +53,9 @@ public final class CorxlRecipes extends JavaPlugin {
             return recipe;
         });
         recipes.put("unbreaking_page", unbreakingPage);
+        DyamiteRecipe dynamite = new DyamiteRecipe();
+        this.getServer().addRecipe(dynamite.getRecipe());
+        recipes.put("dynamite_recipe", dynamite);
     }
 
     public HashMap<String, CustomRecipe> getRecipes() {

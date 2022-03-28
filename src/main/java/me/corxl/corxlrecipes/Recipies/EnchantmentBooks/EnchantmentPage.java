@@ -1,4 +1,4 @@
-package me.corxl.corxlrecipes.Recipies;
+package me.corxl.corxlrecipes.Recipies.EnchantmentBooks;
 
 import me.corxl.corxlrecipes.CorxlRecipes;
 import org.bukkit.ChatColor;

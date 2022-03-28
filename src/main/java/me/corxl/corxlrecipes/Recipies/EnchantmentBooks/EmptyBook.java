@@ -1,7 +1,6 @@
-package me.corxl.corxlrecipes.Recipies;
+package me.corxl.corxlrecipes.Recipies.EnchantmentBooks;
 
 import me.corxl.corxlrecipes.CorxlRecipes;
-import me.corxl.corxlrecipes.Recipies.CustomRecipe;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -34,7 +33,6 @@ public class EmptyBook implements CustomRecipe {
         ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "empty_book"), stack);
         recipe.shape("L");
         recipe.setIngredient('L', Material.LEATHER);
-
         return recipe;
     }
 }

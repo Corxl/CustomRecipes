@@ -1,4 +1,4 @@
-package me.corxl.corxlrecipes.Recipies;
+package me.corxl.corxlrecipes.Recipies.EnchantmentBooks;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
