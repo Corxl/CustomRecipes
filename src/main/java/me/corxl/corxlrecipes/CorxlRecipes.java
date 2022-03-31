@@ -4,11 +4,18 @@ import me.corxl.corxlrecipes.Commands.GiveItemCommand;
 import me.corxl.corxlrecipes.Commands.GiveItemTabCompleter;
 import me.corxl.corxlrecipes.Events.Events;
 import me.corxl.corxlrecipes.Recipies.BlockRecipes.DyamiteRecipe;
+import me.corxl.corxlrecipes.Recipies.ElytraRecipes.DragonFeather;
 import me.corxl.corxlrecipes.Recipies.EnchantmentBooks.CustomRecipe;
 import me.corxl.corxlrecipes.Recipies.EnchantmentBooks.EmptyBook;
 import me.corxl.corxlrecipes.Recipies.EnchantmentBooks.EnchantmentPage;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -56,6 +63,20 @@ public final class CorxlRecipes extends JavaPlugin {
         DyamiteRecipe dynamite = new DyamiteRecipe();
         this.getServer().addRecipe(dynamite.getRecipe());
         recipes.put("dynamite_recipe", dynamite);
+
+        ItemStack elytra = new ItemStack(Material.ELYTRA);
+        elytra.addUnsafeEnchantment(Enchantment.DURABILITY, 4);
+        elytra.addEnchantment(Enchantment.MENDING, 1);
+        ItemMeta meta = elytra.getItemMeta();
+        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&5&lDragon Wings"));
+        elytra.setItemMeta(meta);
+
+        ShapedRecipe elytraRecipe = new ShapedRecipe(new NamespacedKey(this, "elytra_recipe"), elytra);
+        elytraRecipe.shape("PDP", "FPF", "P P");
+        elytraRecipe.setIngredient('P', Material.DRAGON_BREATH);
+        elytraRecipe.setIngredient('D', Material.DRAGON_HEAD);
+        elytraRecipe.setIngredient('F', new RecipeChoice.ExactChoice(new DragonFeather().getItem()));
+        this.getServer().addRecipe(elytraRecipe);
     }
 
     public HashMap<String, CustomRecipe> getRecipes() {

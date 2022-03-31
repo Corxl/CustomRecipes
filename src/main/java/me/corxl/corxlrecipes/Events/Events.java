@@ -2,16 +2,22 @@ package me.corxl.corxlrecipes.Events;
 
 import me.corxl.corxlrecipes.CorxlRecipes;
 import me.corxl.corxlrecipes.Recipies.BlockRecipes.DyamiteRecipe;
+import me.corxl.corxlrecipes.Recipies.ElytraRecipes.DragonFeather;
 import org.bukkit.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collections;
+import java.util.Random;
 
 public class Events implements Listener {
 
@@ -50,5 +56,31 @@ public class Events implements Listener {
                 }
             },tntEntity.getFuseTicks());
         }
+    }
+
+    @EventHandler
+    public void onChunkLoad(EntitiesLoadEvent event) {
+        if (!event.getWorld().getEnvironment().equals(World.Environment.THE_END)) return;
+        for (Entity e : event.getEntities()) {
+            if (!e.getType().equals(EntityType.ITEM_FRAME)) continue;
+            ItemFrame iframe = (ItemFrame) e;
+            if (iframe.getItem().getType().equals(Material.ELYTRA)) {
+                iframe.setItem(new DragonFeather().getItem());
+            }
+        }
+    }
+
+    @EventHandler
+    public void onDragonDeath(EntityDeathEvent event) {
+        if (!event.getEntity().getType().equals(EntityType.ENDER_DRAGON)) return;
+        int delay = 200;
+        if (new Random().nextDouble()<=0.75)
+            Bukkit.getScheduler().runTaskLater(CorxlRecipes.getPlugin(CorxlRecipes.class), () -> {
+                event.getEntity().getWorld().dropItemNaturally(event.getEntity().getLocation(), new DragonFeather().getItem());
+            }, delay);
+        if (new Random().nextDouble()<=0.50)
+            Bukkit.getScheduler().runTaskLater(CorxlRecipes.getPlugin(CorxlRecipes.class), () -> {
+                event.getEntity().getWorld().dropItemNaturally(event.getEntity().getLocation(), new ItemStack(Material.DRAGON_HEAD));
+            }, delay);
     }
 }
