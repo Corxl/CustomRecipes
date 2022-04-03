@@ -1,20 +1,26 @@
 package me.corxl.corxlrecipes.Events;
 
+import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import me.corxl.corxlrecipes.CorxlRecipes;
 import me.corxl.corxlrecipes.Recipies.BlockRecipes.DyamiteRecipe;
+import me.corxl.corxlrecipes.Recipies.ElytraRecipes.BoosterElytra;
+import me.corxl.corxlrecipes.Recipies.ElytraRecipes.Canister;
 import me.corxl.corxlrecipes.Recipies.ElytraRecipes.DragonFeather;
 import org.bukkit.*;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EnderDragonChangePhaseEvent;
+import org.bukkit.event.inventory.BrewEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Collections;
 import java.util.Random;
@@ -38,9 +44,10 @@ public class Events implements Listener {
             Location location = event.getBlock().getLocation().toBlockLocation();
             event.getBlock().setType(Material.AIR);
             World world = event.getBlock().getWorld();
-            TNTPrimed tntEntity = (TNTPrimed) world.spawnEntity(location, EntityType.PRIMED_TNT);
+            double displacement = 2.0;
+            double correction = 0.5;
+            TNTPrimed tntEntity = (TNTPrimed) world.spawnEntity(location.add(correction, 0, correction), EntityType.PRIMED_TNT);
             Bukkit.getScheduler().runTaskLater(CorxlRecipes.getPlugin(CorxlRecipes.class), () -> {
-                int displacement = 2;
                 TNTPrimed[] primedTnt = new TNTPrimed[]{
                         (TNTPrimed) world.spawnEntity(location.add(displacement, -displacement, displacement), EntityType.PRIMED_TNT),
                         (TNTPrimed) world.spawnEntity(location.add(-displacement, -displacement, displacement), EntityType.PRIMED_TNT),
@@ -65,14 +72,15 @@ public class Events implements Listener {
             if (!e.getType().equals(EntityType.ITEM_FRAME)) continue;
             ItemFrame iframe = (ItemFrame) e;
             if (iframe.getItem().getType().equals(Material.ELYTRA)) {
-                iframe.setItem(new DragonFeather().getItem());
+                if (!iframe.getItem().getItemMeta().hasLore())
+                    iframe.setItem(new DragonFeather().getItem());
             }
         }
     }
 
     @EventHandler
-    public void onDragonDeath(EntityDeathEvent event) {
-        if (!event.getEntity().getType().equals(EntityType.ENDER_DRAGON)) return;
+    public void onEnderDragonChangePhase(EnderDragonChangePhaseEvent event) {
+        if (!event.getNewPhase().equals(EnderDragon.Phase.DYING)) return;
         int delay = 200;
         if (new Random().nextDouble()<=0.75)
             Bukkit.getScheduler().runTaskLater(CorxlRecipes.getPlugin(CorxlRecipes.class), () -> {
@@ -82,5 +90,84 @@ public class Events implements Listener {
             Bukkit.getScheduler().runTaskLater(CorxlRecipes.getPlugin(CorxlRecipes.class), () -> {
                 event.getEntity().getWorld().dropItemNaturally(event.getEntity().getLocation(), new ItemStack(Material.DRAGON_HEAD));
             }, delay);
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getAction().isLeftClick()) return;
+        if (event.getClickedBlock()!=null) return;
+        if (!event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.DRAGON_BREATH)) return;
+        ItemStack canister = event.getPlayer().getInventory().getItemInMainHand();
+        if (!canister.getItemMeta().hasLore()) return;
+        if (!canister.getItemMeta().getLore().equals(Canister.getItemLore())) return;
+        if (!canister.getItemMeta().getDisplayName().equals(Canister.ITEM_TITLE)) return;
+        if (event.getPlayer().getInventory().getChestplate()==null) return;
+        if (!event.getPlayer().getInventory().getChestplate().getType().equals(Material.ELYTRA)) {
+            event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou are not wearing Dragon Wings!"));
+            return;
+        }
+        ItemStack elytra = event.getPlayer().getInventory().getChestplate();
+        ItemMeta  meta = elytra.getItemMeta();
+        if (!meta.getPersistentDataContainer().has(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER)) {
+            event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYour Dragon Wings are not fitted with a boost canister!"));
+            return;
+        }
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        int fuel = container.get(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER);
+        if (fuel==100) {
+            event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYour canister is already full!"));
+            return;
+        }
+        fuel +=20;
+        if (fuel > 100)
+            fuel = 100;
+        container.set(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER, fuel);
+        meta.setLore(BoosterElytra.getLore(meta));
+        elytra.setItemMeta(meta);
+        canister.setAmount(canister.getAmount()-1);
+        event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_BREWING_STAND_BREW, 3.0F, 0.5F);
+    }
+
+    @EventHandler
+    public void onPotionBrew(BrewEvent event) {
+        if (!event.getContents().getIngredient().getItemMeta().getDisplayName().equals(Canister.ITEM_TITLE)) return;
+        event.setCancelled(true);
+        ItemStack newCanister = new Canister().getItem();
+        newCanister.setAmount(event.getContents().getIngredient().getAmount());
+        event.getContents().getIngredient().setAmount(0);
+        World world = event.getBlock().getWorld();
+        world.dropItemNaturally(event.getBlock().getLocation(), newCanister);
+        world.playSound(event.getBlock().getLocation(), Sound.AMBIENT_UNDERWATER_ENTER, 3.0F, 0.5F);
+    }
+
+    private void boostPlayer(Player player, ItemStack elytra) {
+        ItemMeta meta = elytra.getItemMeta();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        int fuel = container.get(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER);
+        if (fuel <=0) return;
+        fuel -= 2;
+        if (fuel<=0)
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 3.0F, 0.5F);
+        container.set(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER, fuel);
+        meta.setLore(BoosterElytra.getLore(meta));
+        elytra.setItemMeta(meta);
+        player.setVelocity(player.getLocation().getDirection().multiply(1.5));
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 3.0F, 0.5F);
+    }
+
+    @EventHandler
+    public void onFireWorkUse(PlayerElytraBoostEvent event) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerCrouch(PlayerToggleSneakEvent event) {
+        if (!event.getPlayer().isGliding()) return;
+        if (event.getPlayer().isSneaking()) return;
+        if (event.getPlayer().getInventory().getChestplate()==null) return;
+        if (!event.getPlayer().getInventory().getChestplate().getType().equals(Material.ELYTRA)) return;
+        ItemStack elytra = event.getPlayer().getInventory().getChestplate();
+        if (!elytra.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER)) return;
+        boostPlayer(event.getPlayer(), elytra);
     }
 }

@@ -6,7 +6,7 @@
 
     <groupId>me.corxl</groupId>
     <artifactId>CorxlRecipes</artifactId>
-    <version>1.0</version>
+    <version>${project.version}</version>
     <packaging>jar</packaging>
 
     <name>CorxlRecipes</name>
@@ -14,6 +14,7 @@
     <description>Custom Recipies for the nSmatic SMP</description>
     <properties>
         <java.version>1.8</java.version>
+        <project.version>1.2.9</project.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -40,7 +41,7 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <outputFile>C:\Users\corxl\OneDrive\Desktop\Server\Server\plugins\CorxlRecipes.jar</outputFile>
+                            <outputFile>C:\Users\corxl\OneDrive\Desktop\Server\Server\plugins\CorxlRecipes-${project.version}.jar</outputFile>
                         </configuration>
                     </execution>
                 </executions>
