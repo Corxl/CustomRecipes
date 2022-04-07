@@ -89,6 +89,7 @@ public final class CorxlRecipes extends JavaPlugin {
         for (ShapedRecipe recipe : this.shulkerRecipes()) {
             this.getServer().addRecipe(recipe);
         }
+        this.getServer().addRecipe(this.gravelRecipe());
     }
 
     public HashMap<String, CustomRecipe> getRecipes() {
@@ -120,6 +121,13 @@ public final class CorxlRecipes extends JavaPlugin {
         recipes.add(shulkerBoxRecipe);
 
         return recipes;
+    }
+
+    private ShapedRecipe gravelRecipe() {
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "gravel_recipe"), new ItemStack(Material.GRAVEL, 2));
+        recipe.shape("C", "C");
+        recipe.setIngredient('C', Material.COBBLESTONE);
+        return recipe;
     }
 
 
