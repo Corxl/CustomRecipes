@@ -17,6 +17,7 @@ public class DragonFeather implements CustomRecipe {
     public ItemStack getItem() {
         ItemStack dragonFeather = new ItemStack(Material.FEATHER);
         ItemMeta meta = dragonFeather.getItemMeta();
+        meta.setCustomModelData(1);
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.translateAlternateColorCodes('&', "&6Crafting ingredient used to craft an &dElytra"));
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&5&lDragon Feather"));

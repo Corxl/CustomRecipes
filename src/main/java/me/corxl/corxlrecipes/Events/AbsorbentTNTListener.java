@@ -12,6 +12,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -23,8 +24,9 @@ import org.bukkit.plugin.Plugin;
 
 public class AbsorbentTNTListener implements Listener {
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.MONITOR)
     public void onTnTPlace(BlockPlaceEvent event) {
+        if (event.isCancelled()) return;
         ItemStack block = event.getItemInHand();
         ItemMeta meta = block.getItemMeta();
         if (!block.getType().equals(Material.TNT)) return;
@@ -33,7 +35,7 @@ public class AbsorbentTNTListener implements Listener {
         tnt.setType(Material.AIR);
         Location l = tnt.getLocation();
         World world = l.getWorld();
-        Entity entity = world.spawnEntity(l, EntityType.PRIMED_TNT);
+        Entity entity = world.spawnEntity(l.add(0.5, 0, 0.5), EntityType.PRIMED_TNT);
         PersistentDataContainer container = entity.getPersistentDataContainer();
         container.set(getNSK(CorxlRecipes.getPlugin(CorxlRecipes.class)), PersistentDataType.INTEGER, 1);
     }

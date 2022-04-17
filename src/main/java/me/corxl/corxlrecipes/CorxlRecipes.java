@@ -3,6 +3,7 @@ package me.corxl.corxlrecipes;
 import me.corxl.corxlrecipes.Commands.GiveItemCommand;
 import me.corxl.corxlrecipes.Commands.GiveItemTabCompleter;
 import me.corxl.corxlrecipes.Events.AbsorbentTNTListener;
+import me.corxl.corxlrecipes.Events.AnvilPrepareListener;
 import me.corxl.corxlrecipes.Events.Events;
 import me.corxl.corxlrecipes.Recipies.BlockRecipes.AbsorbentTNT;
 import me.corxl.corxlrecipes.Recipies.BlockRecipes.DyamiteRecipe;
@@ -34,6 +35,7 @@ public final class CorxlRecipes extends JavaPlugin {
         // Plugin startup logic
         this.getServer().getPluginManager().registerEvents(new Events(), this);
         this.getServer().getPluginManager().registerEvents(new AbsorbentTNTListener(), this);
+        this.getServer().getPluginManager().registerEvents(new AnvilPrepareListener(), this);
         this.getCommand("crgiveitem").setExecutor(new GiveItemCommand());
         this.getCommand("crgiveitem").setTabCompleter(new GiveItemTabCompleter());
         recipes.put("empty_book", new EmptyBook());

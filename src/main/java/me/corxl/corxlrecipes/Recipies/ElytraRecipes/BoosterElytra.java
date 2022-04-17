@@ -22,7 +22,7 @@ public class BoosterElytra implements CustomRecipe {
     public ItemStack getItem() {
         ItemStack elytra = new DragonWings().getItem();
         ItemMeta meta = elytra.getItemMeta();
-
+        meta.setCustomModelData(2);
         PersistentDataContainer container = meta.getPersistentDataContainer();
         container.set(new NamespacedKey(plugin, "boosted_elytra"), PersistentDataType.INTEGER, 0);
         meta.setLore(getLore());

@@ -29,16 +29,16 @@ public class AbsorbentTNT implements CustomRecipe {
         tnt.setItemMeta(meta);
         tnt.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
         tnt.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        tnt.setAmount(4);
         return tnt;
     }
 
     @Override
     public ShapedRecipe getRecipe() {
         ShapedRecipe recipe = new ShapedRecipe(getNSK(CorxlRecipes.getPlugin(CorxlRecipes.class)), this.getItem());
-        recipe.shape("GSG", "SPS", "GSG");
+        recipe.shape(" G ", "GPG", " G ");
         recipe.setIngredient('G', new RecipeChoice.ExactChoice(new ItemStack(Material.GUNPOWDER)));
-        recipe.setIngredient('S', new RecipeChoice.ExactChoice(new ItemStack(Material.SAND)));
-        recipe.setIngredient('P', new RecipeChoice.ExactChoice(new ItemStack(Material.SPONGE)));
+        recipe.setIngredient('P', new RecipeChoice.ExactChoice(new ItemStack(Material.BUCKET)));
         return recipe;
     }
 

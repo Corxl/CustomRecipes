@@ -9,6 +9,7 @@ import me.corxl.corxlrecipes.Recipies.ElytraRecipes.DragonFeather;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EnderDragonChangePhaseEvent;
@@ -36,8 +37,9 @@ public class Events implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.MONITOR)
     public void onTnTPlace(BlockPlaceEvent event) {
+        if (event.isCancelled()) return;
         if (!event.getBlock().getType().equals(Material.TNT)) return;
         ItemStack tnt = event.getItemInHand();
         if (tnt.getItemMeta().getDisplayName().equals(DyamiteRecipe.TNT_DISPLAYNAME)&&tnt.getItemMeta().hasLore()) {

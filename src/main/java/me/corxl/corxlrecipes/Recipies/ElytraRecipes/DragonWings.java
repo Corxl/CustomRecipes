@@ -24,6 +24,7 @@ public class DragonWings implements CustomRecipe {
         ItemStack elytra = new ItemStack(Material.ELYTRA);
         elytra.addUnsafeEnchantment(Enchantment.DURABILITY, 3);
         ItemMeta meta = elytra.getItemMeta();
+        meta.setCustomModelData(1);
         List<String> elytraLore = new ArrayList<>();
         elytraLore.add(ChatColor.translateAlternateColorCodes('&', "&bBoost Canister: &4Not Installed"));
         meta.setLore(elytraLore);

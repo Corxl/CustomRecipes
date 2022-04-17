@@ -28,6 +28,7 @@ public class Canister implements CustomRecipe {
     public ItemStack getItem() {
         ItemStack canister = new ItemStack(Material.DRAGON_BREATH);
         ItemMeta meta = canister.getItemMeta();
+        meta.setCustomModelData(1);
         meta.setLore(getItemLore());
         meta.setDisplayName(ITEM_TITLE);
         canister.setItemMeta(meta);
