@@ -15,6 +15,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EnderDragonChangePhaseEvent;
 import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
@@ -98,7 +99,8 @@ public class Events implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction().isLeftClick()) return;
         if (event.getClickedBlock()!=null) return;
-        if (!event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.DRAGON_BREATH)) return;
+        if (event.getItem()==null) return;
+        if (!event.getItem().getType().equals(Material.DRAGON_BREATH)) return;
         ItemStack canister = event.getPlayer().getInventory().getItemInMainHand();
         if (!canister.getItemMeta().hasLore()) return;
         if (!canister.getItemMeta().getLore().equals(Canister.getItemLore())) return;
@@ -114,10 +116,15 @@ public class Events implements Listener {
             event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYour Dragon Wings are not fitted with a boost canister!"));
             return;
         }
+        if (!meta.getPersistentDataContainer().has(BoosterElytra.getBoostModeKey(), PersistentDataType.INTEGER)) {
+            meta.getPersistentDataContainer().set(BoosterElytra.getBoostModeKey(), PersistentDataType.INTEGER, 1);
+            elytra.setItemMeta(meta);
+        }
         PersistentDataContainer container = meta.getPersistentDataContainer();
         int fuel = container.get(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER);
         if (fuel==100) {
             event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYour canister is already full!"));
+            PlayerGlideListener.showFuelToPlayer(meta, event.getPlayer());
             return;
         }
         fuel +=20;
@@ -128,6 +135,21 @@ public class Events implements Listener {
         elytra.setItemMeta(meta);
         canister.setAmount(canister.getAmount()-1);
         event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_BREWING_STAND_BREW, 3.0F, 0.5F);
+        PlayerGlideListener.showFuelToPlayer(elytra.getItemMeta(), event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onSwapItems(PlayerItemHeldEvent event) {
+        Bukkit.getScheduler().runTaskLater(CorxlRecipes.getPlugin(CorxlRecipes.class), () -> {
+            if (!event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.DRAGON_BREATH)) return;
+            ItemStack dragonsBreath = event.getPlayer().getInventory().getItemInMainHand();
+            if (!dragonsBreath.getItemMeta().hasLore()) return;
+            if (!dragonsBreath.getItemMeta().getDisplayName().equals(Canister.ITEM_TITLE)) return;
+            if (event.getPlayer().getInventory().getChestplate()==null || !event.getPlayer().getInventory().getChestplate().getType().equals(Material.ELYTRA)) return;
+            ItemStack elytra = event.getPlayer().getInventory().getChestplate();
+            if (!elytra.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER)) return;
+            PlayerGlideListener.showFuelToPlayer(elytra.getItemMeta(), event.getPlayer());
+        }, 1);
     }
 
     @EventHandler
@@ -146,15 +168,21 @@ public class Events implements Listener {
         ItemMeta meta = elytra.getItemMeta();
         PersistentDataContainer container = meta.getPersistentDataContainer();
         int fuel = container.get(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER);
-        if (fuel <=0) return;
-        fuel -= 2;
-        if (fuel<=0)
+        int mode = container.get(BoosterElytra.getBoostModeKey(), PersistentDataType.INTEGER);
+        int newFuel = fuel - (2*mode);
+        if (newFuel<0)
+            return;
+        if (newFuel==0) {
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 3.0F, 0.5F);
-        container.set(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER, fuel);
+        } else {
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 3.0F, 0.5F);
+        }
+        container.set(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "boosted_elytra"), PersistentDataType.INTEGER, newFuel);
         meta.setLore(BoosterElytra.getLore(meta));
         elytra.setItemMeta(meta);
-        player.setVelocity(player.getLocation().getDirection().multiply(1.5));
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 3.0F, 0.5F);
+        double boostAmount = 1.0 + ((double)mode * 0.5);
+        player.setVelocity(player.getLocation().getDirection().multiply(boostAmount)); // 1.5
+        PlayerGlideListener.showFuelToPlayer(elytra.getItemMeta(), player);
     }
 
     @EventHandler

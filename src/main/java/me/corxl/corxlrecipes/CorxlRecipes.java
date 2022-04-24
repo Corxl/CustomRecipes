@@ -2,9 +2,7 @@ package me.corxl.corxlrecipes;
 
 import me.corxl.corxlrecipes.Commands.GiveItemCommand;
 import me.corxl.corxlrecipes.Commands.GiveItemTabCompleter;
-import me.corxl.corxlrecipes.Events.AbsorbentTNTListener;
-import me.corxl.corxlrecipes.Events.AnvilPrepareListener;
-import me.corxl.corxlrecipes.Events.Events;
+import me.corxl.corxlrecipes.Events.*;
 import me.corxl.corxlrecipes.Recipies.BlockRecipes.AbsorbentTNT;
 import me.corxl.corxlrecipes.Recipies.BlockRecipes.DyamiteRecipe;
 import me.corxl.corxlrecipes.Recipies.ElytraRecipes.BoosterElytra;
@@ -36,6 +34,8 @@ public final class CorxlRecipes extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new Events(), this);
         this.getServer().getPluginManager().registerEvents(new AbsorbentTNTListener(), this);
         this.getServer().getPluginManager().registerEvents(new AnvilPrepareListener(), this);
+        this.getServer().getPluginManager().registerEvents(new PlayerGlideListener(), this);
+        this.getServer().getPluginManager().registerEvents(new ElytraModeSwitchListener(), this);
         this.getCommand("crgiveitem").setExecutor(new GiveItemCommand());
         this.getCommand("crgiveitem").setTabCompleter(new GiveItemTabCompleter());
         recipes.put("empty_book", new EmptyBook());
@@ -56,6 +56,18 @@ public final class CorxlRecipes extends JavaPlugin {
             return recipe;
         });
         recipes.put("fortune_page", fortunePage);
+
+        EnchantmentPage lootingPage = new EnchantmentPage(Enchantment.LOOT_BONUS_MOBS, recipe -> {
+            recipe.shape("DED", "SPG", "DBD");
+            recipe.setIngredient('D', new ItemStack(Material.DIAMOND));
+            recipe.setIngredient('E', new ItemStack(Material.ENDER_PEARL));
+            recipe.setIngredient('S', new ItemStack(Material.STRING));
+            recipe.setIngredient('P', new ItemStack(Material.PAPER));
+            recipe.setIngredient('G', new ItemStack(Material.GUNPOWDER));
+            recipe.setIngredient('B', new ItemStack(Material.BONE));
+            return recipe;
+        });
+        recipes.put("looting_page", lootingPage);
 
         EnchantmentPage mendingPage = new EnchantmentPage(Enchantment.MENDING, recipe -> {
             recipe.shape(" E ", "DND", " E ");

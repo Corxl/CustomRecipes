@@ -26,7 +26,7 @@ public class Canister implements CustomRecipe {
 
     @Override
     public ItemStack getItem() {
-        ItemStack canister = new ItemStack(Material.DRAGON_BREATH);
+        ItemStack canister = new ItemStack(Material.DRAGON_BREATH, 2);
         ItemMeta meta = canister.getItemMeta();
         meta.setCustomModelData(1);
         meta.setLore(getItemLore());
@@ -39,9 +39,10 @@ public class Canister implements CustomRecipe {
     @Override
     public ShapedRecipe getRecipe() {
         ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(CorxlRecipes.getPlugin(CorxlRecipes.class), "canister_recipe"), this.getItem());
-        recipe.shape("IGI", "IGI");
+        recipe.shape("CGC", "IGI", "CGC");
         recipe.setIngredient('I', Material.IRON_INGOT);
         recipe.setIngredient('G', Material.GUNPOWDER);
+        recipe.setIngredient('C', Material.COPPER_INGOT);
         return recipe;
     }
 }
